@@ -13,7 +13,7 @@ A Go client library for detecting file changes using Merkle trees. This library 
 ## Installation
 
 ```bash
-go get file-change-detector
+go get github.com/Ridwan414/file-change-detector
 ```
 
 ## Usage
@@ -26,7 +26,7 @@ package main
 import (
     "fmt"
     "log"
-    "file-change-detector/merkle"
+    "github.com/Ridwan414/file-change-detector/merkle"
 )
 
 func main() {
