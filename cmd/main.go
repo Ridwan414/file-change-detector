@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Ridwan414/file-change-detector/v1/pkg/merkle"
+	"github.com/Ridwan414/file-change-detector/pkg/merkle"
 )
 
 func main() {

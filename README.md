@@ -16,6 +16,39 @@ A Go client library for detecting file changes using Merkle trees. This library 
 go get github.com/Ridwan414/file-change-detector
 ```
 
+## Quick Start
+
+1. **Install the library**:
+   ```bash
+   go get github.com/Ridwan414/file-change-detector
+   ```
+
+2. **Import in your Go code**:
+   ```go
+   import "github.com/Ridwan414/file-change-detector/pkg/merkle"
+   ```
+
+3. **Create a client and take your first snapshot**:
+   ```go
+   client := merkle.NewClient("merkle_states")  // Storage directory
+   snapshot, err := client.CreateSnapshot("./my-folder")
+   if err != nil {
+       log.Fatal(err)
+   }
+   client.SaveSnapshot(snapshot, "./my-folder")
+   ```
+
+4. **Compare changes** (run again after modifying files):
+   ```go
+   // Load previous snapshot and compare with current state
+   latestFile, _ := client.FindLatestSnapshot("./my-folder")
+   oldSnapshot, _ := client.LoadSnapshot(latestFile)
+   newSnapshot, _ := client.CreateSnapshot("./my-folder")
+   
+   report := client.CompareSnapshots(oldSnapshot, newSnapshot)
+   merkle.PrintChangeReport(report)  // Shows what changed
+   ```
+
 ## Usage
 
 ### Basic Example
@@ -26,7 +59,7 @@ package main
 import (
     "fmt"
     "log"
-    "github.com/Ridwan414/file-change-detector/merkle"
+    "github.com/Ridwan414/file-change-detector/pkg/merkle"
 )
 
 func main() {
@@ -52,39 +85,58 @@ func main() {
 ### Comparing Snapshots
 
 ```go
-// Find the latest snapshot
-latestFile, err := client.FindLatestSnapshot("./my-folder")
-if err != nil {
-    log.Fatal("No previous snapshot found")
-}
+package main
 
-// Load previous snapshot
-previousSnapshot, err := client.LoadSnapshot(latestFile)
-if err != nil {
-    log.Fatal(err)
-}
+import (
+    "fmt"
+    "log"
+    "github.com/Ridwan414/file-change-detector/pkg/merkle"
+)
 
-// Create current snapshot
-currentSnapshot, err := client.CreateSnapshot("./my-folder")
-if err != nil {
-    log.Fatal(err)
-}
+func main() {
+    // Create a client with storage directory
+    client := merkle.NewClient("merkle_states")
+    
+    // Find the latest snapshot
+    latestFile, err := client.FindLatestSnapshot("./my-folder")
+    if err != nil {
+        log.Fatal("No previous snapshot found")
+    }
 
-// Compare snapshots
-report := client.CompareSnapshots(previousSnapshot, currentSnapshot)
+    // Load previous snapshot
+    previousSnapshot, err := client.LoadSnapshot(latestFile)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-// Display changes
-merkle.PrintChangeReport(report)
+    // Create current snapshot
+    currentSnapshot, err := client.CreateSnapshot("./my-folder")
+    if err != nil {
+        log.Fatal(err)
+    }
 
-// Or access changes programmatically
-for _, change := range report.Changes {
-    switch change.ChangeType {
-    case merkle.Modified:
-        fmt.Printf("Modified: %s\n", change.FileName)
-    case merkle.Added:
-        fmt.Printf("Added: %s\n", change.FileName)
-    case merkle.Deleted:
-        fmt.Printf("Deleted: %s\n", change.FileName)
+    // Compare snapshots
+    report := client.CompareSnapshots(previousSnapshot, currentSnapshot)
+
+    // Display changes using built-in formatter
+    merkle.PrintChangeReport(report)
+
+    // Or access changes programmatically
+    for _, change := range report.Changes {
+        switch change.ChangeType {
+        case merkle.Modified:
+            fmt.Printf("Modified: %s\n", change.FileName)
+        case merkle.Added:
+            fmt.Printf("Added: %s\n", change.FileName)
+        case merkle.Deleted:
+            fmt.Printf("Deleted: %s\n", change.FileName)
+        }
+    }
+    
+    // Save the current snapshot for future comparisons
+    err = client.SaveSnapshot(currentSnapshot, "./my-folder")
+    if err != nil {
+        log.Fatal(err)
     }
 }
 ```
@@ -152,15 +204,21 @@ const (
 
 ## Command Line Usage
 
-The package includes a command-line tool:
+The package includes a command-line example tool:
 
 ```bash
-# Create initial snapshot
-go run main.go /path/to/folder
+# Clone the repository to try the example
+git clone https://github.com/Ridwan414/file-change-detector.git
+cd file-change-detector
 
-# Compare with previous snapshot
-go run main.go /path/to/folder --compare
+# Create initial snapshot
+go run example/main.go /path/to/folder
+
+# Run again to compare with previous snapshot
+go run example/main.go /path/to/folder
 ```
+
+Or use it directly in your project by importing the library.
 
 ## Storage Format
 
