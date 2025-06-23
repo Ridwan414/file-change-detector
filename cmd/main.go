@@ -1,9 +1,10 @@
 package main
 
 import (
-	"file-change-detector/internal/merkle"
 	"fmt"
 	"os"
+
+	"github.com/Ridwan414/file-change-detector/internal/merkle"
 )
 
 func main() {
